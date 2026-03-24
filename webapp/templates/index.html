@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top Παραστάσεις – Αθηνόραμα</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f4f0;
+      color: #1a1a1a;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+    header span { font-size: 0.85rem; opacity: 0.6; }
+
+    .filters {
+      background: #fff;
+      border-bottom: 1px solid #e0ddd6;
+      padding: 0.6rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .filters a {
+      text-decoration: none;
+      padding: 0.28rem 0.7rem;
+      border-radius: 99px;
+      font-size: 0.80rem;
+      border: 1px solid #ddd;
+      color: #444;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .filters a .count {
+      font-size: 0.68rem;
+      opacity: 0.6;
+      margin-left: 0.25rem;
+    }
+
+    .filters a:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .filters a:hover .count { opacity: 0.8; }
+    .filters a.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; font-weight: 600; }
+    .filters a.active .count { opacity: 0.75; }
+
+    .filter-sep {
+      width: 1px;
+      height: 1.4rem;
+      background: #e0ddd6;
+      margin: 0 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+      padding: 1.5rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e8e5de;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+
+    .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+
+    .card-body { padding: 1.1rem 1.25rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #1a1a2e;
+    }
+
+    .card-title a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card-title a:hover { text-decoration: underline; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+    .tag {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 99px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .tag-cat { background: #e8f0fe; color: #1a56db; }
+    .tag-dur { background: #f0fdf4; color: #166534; }
+    .tag-ticket { background: #fff7ed; color: #9a3412; }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: #555;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-meta {
+      margin-top: auto;
+      padding-top: 0.6rem;
+      border-top: 1px solid #f0ede6;
+      font-size: 0.78rem;
+      color: #777;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .card-meta strong { color: #333; }
+
+    .card-footer {
+      padding: 0.7rem 1.25rem;
+      background: #fafaf8;
+      border-top: 1px solid #f0ede6;
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary { background: #1a1a2e; color: #fff; }
+    .btn-primary:hover { background: #2d2d50; }
+    .btn-outline { border: 1px solid #ccc; color: #444; }
+    .btn-outline:hover { border-color: #888; color: #1a1a2e; }
+
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.78rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Top Παραστάσεις</h1>
+  <span>{{ total }} παραστάσεις{% if selected_category %} · {{ selected_category }}{% endif %}</span>
+</header>
+
+<nav class="filters">
+  <a href="/" class="{{ 'active' if not selected_category else '' }}">
+    Όλες
+  </a>
+  <div class="filter-sep"></div>
+  {% for cat, count in filters %}
+    <a href="/?category={{ cat | urlencode }}"
+       class="{{ 'active' if cat == selected_category else '' }}">
+      {{ cat }}<span class="count">{{ count }}</span>
+    </a>
+  {% endfor %}
+</nav>
+
+<main class="grid">
+  {% if not performances %}
+    <div class="empty">Δεν βρέθηκαν παραστάσεις.</div>
+  {% endif %}
+
+  {% for p in performances %}
+  {% set venue = p.venues[0] if p.venues else none %}
+  <article class="card">
+    <div class="card-body">
+
+      <div class="card-title">
+        <a href="{{ p.source_url }}" target="_blank" rel="noopener">{{ p.title or p.slug }}</a>
+      </div>
+
+      <div class="tags">
+        {% if p._category %}<span class="tag tag-cat">{{ p._category }}</span>{% endif %}
+        {% if p.duration_minutes %}<span class="tag tag-dur">{{ p.duration_minutes }}'</span>{% endif %}
+        {% if p.ticket_urls %}<span class="tag tag-ticket">Εισιτήρια online</span>{% endif %}
+      </div>
+
+      {% if p.description %}
+        <p class="card-desc">{{ p.description }}</p>
+      {% endif %}
+
+      <div class="card-meta">
+        {% if venue and venue.venue_name %}
+          <div><strong>Θέατρο:</strong> {{ venue.venue_name }}{% if venue.area %} · {{ venue.area }}{% endif %}</div>
+        {% endif %}
+        {% if venue and venue.schedule_summary %}
+          <div><strong>Ώρες:</strong> {{ venue.schedule_summary }}</div>
+        {% endif %}
+        {% if venue and venue.price_text %}
+          <div><strong>Τιμή:</strong> {{ venue.price_text }}</div>
+        {% endif %}
+        {% if p.run_until_iso %}
+          <div><strong>Έως:</strong> {{ p.run_until_iso }}</div>
+        {% endif %}
+        {% if p.director_text %}
+          <div>{{ p.director_text }}</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <div class="card-footer">
+      <a href="{{ p.source_url }}" target="_blank" rel="noopener" class="btn btn-primary">Λεπτομέρειες</a>
+      {% if p.ticket_urls %}
+        <a href="{{ p.ticket_urls[0] }}" target="_blank" rel="noopener" class="btn btn-outline">Αγορά εισιτηρίων</a>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</main>
+
+<footer>Δεδομένα από athinorama.gr · Ranked by content completeness</footer>
+
+</body>
+</html>
